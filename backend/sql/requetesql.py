@@ -109,4 +109,3 @@ def insert_student() -> None:
 
         print(error)
 
-insert_student()
