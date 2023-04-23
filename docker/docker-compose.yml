@@ -1,0 +1,99 @@
+version: "2.1"
+
+
+networks:
+  front:
+    driver: bridge
+  middle:
+    driver: bridge
+  back:
+    driver: bridge
+
+
+services:
+
+  # Frontend containers
+  nginx01:
+    image: nginx
+    container_name: DCKFRNT01
+    ports: 
+      - "8080:80"
+    networks: 
+      - front
+
+  nginx02:
+    image: nginx
+    container_name: DCKFRNT02
+    ports: 
+      - "8081:80"
+    networks: 
+      - front
+
+  nginx03:
+    image: nginx
+    container_name: DCKFRNT03
+    ports: 
+      - "8082:80"
+    networks: 
+      - front
+
+  # Compute (middle) containers
+  nginx04:
+    image: nginx
+    container_name: DCKCMPT01
+    ports: 
+      - "8083:80"
+    networks: 
+      - middle 
+
+  traefik:
+    image: traefik
+    container_name: DCKCMPT02
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "81:80"
+      - "8084:8080"
+    networks: 
+      - middle 
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+
+  python01:
+    image: python
+    container_name: DCKCMPT03
+    networks: 
+      - middle 
+
+  grafana:
+    image: grafana/grafana
+    container_name: DCKCMPT04
+    ports: 
+      - "3000:3000"
+    networks: 
+      - middle 
+
+        
+  # Data (backend) containers
+  prometheus:
+    image: bitnami/prometheus
+    container_name: DCKDATA01
+      - "3000:3000"
+    networks: 
+      - back 
+
+  postgres:
+    image: postgres
+    container_name: DCKDATA02
+    networks: 
+      - back 
