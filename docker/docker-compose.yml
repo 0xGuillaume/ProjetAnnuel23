@@ -78,22 +78,37 @@ services:
   grafana:
     image: grafana/grafana
     container_name: DCKCMPT04
-    ports: 
+    ports:
       - "3000:3000"
-    networks: 
-      - middle 
+    networks:
+      - middle
 
-        
+
   # Data (backend) containers
   prometheus:
     image: bitnami/prometheus
     container_name: DCKDATA01
+    ports:
       - "3000:3000"
-    networks: 
-      - back 
+    networks:
+      - back
 
   postgres:
     image: postgres
-    container_name: DCKDATA02
-    networks: 
-      - back 
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+    - /scripts/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - back
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8090:8080"
+    networks:
+      - back
