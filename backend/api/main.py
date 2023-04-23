@@ -13,7 +13,7 @@ def read_json(name:str) -> list:
     """    
     
     try:
-        with open(f"{name}.json", "r") as file:
+        with open(f"data/{name}.json", "r") as file:
             data = json.load(file)
         return data
 
@@ -22,7 +22,7 @@ def read_json(name:str) -> list:
 
 
 SERVERS         = read_json("servers")
-CONTAINERS      = read_json("servers")
+CONTAINERS      = read_json("containers")
 CLUSTERS        = read_json("servers")
 APPLICATIONS    = read_json("servers")
 
@@ -82,8 +82,8 @@ def read_application(name:str) -> dict:
     return response
 
 
-@app.get("containers")
-def containers() -> dict:
+@app.get("/containers")
+def containers() -> list:
     """List all containers"""
 
     return CONTAINERS
