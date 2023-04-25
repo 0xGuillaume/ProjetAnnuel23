@@ -94,7 +94,7 @@ services:
     ports:
      - "9090:9090"
     volumes:
-    - /scripts/prometheous/prometheus.yml:/etc/prometheus/prometheus.yml
+    - /scripts/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - middle
     depends_on:
