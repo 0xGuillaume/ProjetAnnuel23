@@ -73,25 +73,32 @@ services:
     image: python
     container_name: DCKCMPT03
     networks: 
-      - middle 
+      - middle
 
   grafana:
     image: grafana/grafana
-    container_name: DCKCMPT04
     ports:
       - "3000:3000"
     networks:
       - middle
+    volumes:
+       - /scripts/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+       - /scripts/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+       - /scripts/grafana/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+       - /scripts/grafana/docker-container.json:/etc/grafana/provisioning/dashboards/docker-host.json
 
 
   # Data (backend) containers
   prometheus:
-    image: bitnami/prometheus
-    container_name: DCKDATA01
+    image: prom/prometheus
     ports:
-      - "3000:3000"
+     - "9090:9090"
+    volumes:
+    - /scripts/prometheous/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - back
+      - middle
+    depends_on:
+    - cadvisor
 
   postgres:
     image: postgres
@@ -109,6 +116,35 @@ services:
     image: adminer
     restart: always
     ports:
-      - "8090:8080"
+      - "8085:8080"
     networks:
       - back
+  
+  node-exporter:
+   image: prom/node-exporter
+   restart: always
+   ports:
+    - "9100:9100"
+   networks:
+     - middle
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+    - "8086:8080"
+    networks:
+     - middle
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+    - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+    - "6379:6379"
