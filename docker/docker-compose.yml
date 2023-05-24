@@ -74,22 +74,6 @@ services:
       - front
       - back
 
-  traefik:
-    image: traefik
-    container_name: DCKCMPT02
-    command:
-      #- "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "81:80"
-      - "8084:8080"
-    networks:
-      - front
-      - back
-
 
   python01:
     image: python
@@ -152,3 +136,60 @@ services:
       - "5432:5432"
     networks:
       - back
+
+  traefik:
+      image: traefik:v2.4
+      command:
+        - "--api.insecure=true"
+        - "--providers.docker=true"
+        - "--providers.docker.exposedbydefault=false"
+        - "--entrypoints.web.address=:80"
+      ports:
+        - "80:80"
+        - "8084:8080"
+      networks:
+        - front
+        - back
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+  nginxLB01:
+      image: nginx:latest
+      networks:
+        - back
+      volumes:
+        - ./html/nginx01.html:/usr/share/nginx/html/index.html
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+        - "traefik.http.services.nginx.loadbalancer.server.port=80"
+  nginxLB02:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx02.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+  nginxLB03:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx03.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+  nginxLB04:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx04.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
