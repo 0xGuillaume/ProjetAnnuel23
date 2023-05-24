@@ -1,7 +1,7 @@
 
 # Grafana
 
-## Prometheous
+## Prometheus
 
 ## Cadvisor
 
