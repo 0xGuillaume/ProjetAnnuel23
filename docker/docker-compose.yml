@@ -1,14 +1,16 @@
 version: "2.1"
 
-
 networks:
   front:
     driver: bridge
-  middle:
-    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
   back:
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 10.0.2.0/24
 
 services:
 
@@ -16,35 +18,61 @@ services:
   nginx01:
     image: nginx
     container_name: DCKFRNT01
-    ports: 
+    ports:
       - "8080:80"
-    networks: 
+    networks:
       - front
+      - back
 
   nginx02:
     image: nginx
     container_name: DCKFRNT02
-    ports: 
+    ports:
       - "8081:80"
-    networks: 
+    networks:
       - front
+      - back
 
   nginx03:
     image: nginx
     container_name: DCKFRNT03
-    ports: 
+    ports:
       - "8082:80"
-    networks: 
+    networks:
       - front
+      - back
+
+  grafana:
+    image: grafana/grafana
+    container_name: Grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - front
+      - back
+    volumes:
+      - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ../grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+      - ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+
+  adminer:
+    image: adminer
+    container_name: Adminer
+    restart: always
+    ports:
+      - "8085:8080"
+    networks:
+      - front
+      - back
 
   # Compute (middle) containers
   nginx04:
     image: nginx
     container_name: DCKCMPT01
-    ports: 
-      - "8083:80"
-    networks: 
-      - middle 
+    networks:
+      - front
+      - back
 
   traefik:
     image: traefik
@@ -58,49 +86,59 @@ services:
     ports:
       - "81:80"
       - "8084:8080"
-    networks: 
-      - middle 
+    networks:
+      - front
+      - back
 
-  whoami:
-    image: "traefik/whoami"
-    container_name: "simple-service"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
 
   python01:
     image: python
     container_name: DCKCMPT03
-    networks: 
-      - middle
-
-  grafana:
-    image: grafana/grafana
-    container_name: Grafana
-    ports:
-      - "3000:3000"
     networks:
-      - middle
-    volumes:
-       - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-       - ../grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-       - ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
-       - ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+      - back
 
+  node-exporter:
+    image: prom/node-exporter
+    container_name: Node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    networks:
+      - back
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: Cadvisor
+    ports:
+      - "8086:8080"
+    networks:
+      - back
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: Redis
+    ports:
+      - "6379:6379"
+    networks:
+      - back
 
   # Data (backend) containers
   prometheus:
     image: prom/prometheus
     container_name: Prometheus
-    ports:
-     - "9090:9090"
     volumes:
-    - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - middle
+      - back
     depends_on:
-    - cadvisor
+      - cadvisor
 
   postgres:
     image: postgres
@@ -109,60 +147,8 @@ services:
     environment:
       POSTGRES_PASSWORD: example
     volumes:
-    - ../backend/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
+      - ../backend/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
     ports:
       - "5432:5432"
     networks:
       - back
-
-  adminer:
-    image: adminer
-    container_name: Adminer
-    restart: always
-    ports:
-      - "8085:8080"
-    networks:
-      - back
-  
-  node-exporter:
-   image: prom/node-exporter
-   container_name: Node-exporter
-   restart: always
-   ports:
-    - "9100:9100"
-   networks:
-     - middle
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: Cadvisor
-    ports:
-    - "8086:8080"
-    networks:
-     - middle
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    depends_on:
-    - redis
-
-  redis:
-    image: redis:latest
-    container_name: Redis
-    ports:
-    - "6379:6379"
-
-
-  gitlab:
-    image: gitlab/gitlab-ce
-    container_name: gitlab
-    hostname: gitlab.example.com
-    ports:
-    - "8095:80"
-    - "22:22"
-    volumes:
-      - '/srv/gitlab/config:/etc/gitlab'
-      - '/srv/gitlab/logs:/var/log/gitlab'
-      - '/srv/gitlab/data:/var/opt/gitlab'
