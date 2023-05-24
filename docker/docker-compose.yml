@@ -153,3 +153,16 @@ services:
     container_name: Redis
     ports:
     - "6379:6379"
+
+
+  gitlab:
+    image: gitlab/gitlab-ce
+    container_name: gitlab
+    hostname: gitlab.example.com
+    ports:
+    - "8095:80"
+    - "22:22"
+    volumes:
+      - '/srv/gitlab/config:/etc/gitlab'
+      - '/srv/gitlab/logs:/var/log/gitlab'
+      - '/srv/gitlab/data:/var/opt/gitlab'
