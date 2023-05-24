@@ -83,10 +83,10 @@ services:
     networks:
       - middle
     volumes:
-       - /scripts/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-       - /scripts/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-       - /scripts/grafana/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
-       - /scripts/grafana/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+       - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+       - ../grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+       - ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+       - ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
 
 
   # Data (backend) containers
@@ -96,7 +96,7 @@ services:
     ports:
      - "9090:9090"
     volumes:
-    - /scripts/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - middle
     depends_on:
@@ -109,7 +109,7 @@ services:
     environment:
       POSTGRES_PASSWORD: example
     volumes:
-    - /scripts/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
+    - ../backend/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
     ports:
       - "5432:5432"
     networks:
