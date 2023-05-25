@@ -15,33 +15,6 @@ networks:
 services:
 
   # Frontend containers
-  nginx01:
-    image: nginx
-    container_name: DCKFRNT01
-    ports:
-      - "8080:80"
-    networks:
-      - front
-      - back
-
-  nginx02:
-    image: nginx
-    container_name: DCKFRNT02
-    ports:
-      - "8081:80"
-    networks:
-      - front
-      - back
-
-  nginx03:
-    image: nginx
-    container_name: DCKFRNT03
-    ports:
-      - "8082:80"
-    networks:
-      - front
-      - back
-
   grafana:
     image: grafana/grafana
     container_name: Grafana
@@ -67,17 +40,16 @@ services:
       - back
 
   # Compute (middle) containers
-  nginx04:
-    image: nginx
-    container_name: DCKCMPT01
-    networks:
-      - front
-      - back
-
-
-  python01:
+  api: # API 
     image: python
     container_name: DCKCMPT03
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
     networks:
       - back
 
@@ -126,7 +98,7 @@ services:
 
   postgres:
     image: postgres
-    container_name: Postgres
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_PASSWORD: example
@@ -163,6 +135,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
         - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
   nginxLB02:
     image: nginx:latest
     networks:
@@ -173,6 +146,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
   nginxLB03:
     image: nginx:latest
     networks:
@@ -183,6 +157,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
       - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
   nginxLB04:
     image: nginx:latest
     networks:
