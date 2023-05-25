@@ -1,0 +1,170 @@
+version: "2.1"
+
+networks:
+  front:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+  back:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.2.0/24
+
+services:
+
+  # Frontend containers
+  grafana:
+    image: grafana/grafana
+    container_name: Grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - front
+      - back
+    volumes:
+      - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ../grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+      - ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+
+  adminer:
+    image: adminer
+    container_name: Adminer
+    restart: always
+    ports:
+      - "8085:8080"
+    networks:
+      - front
+      - back
+
+  # Compute (middle) containers
+  api: # API 
+    image: python
+    container_name: DCKCMPT03
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+    networks:
+      - back
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: Node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    networks:
+      - back
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: Cadvisor
+    ports:
+      - "8086:8080"
+    networks:
+      - back
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: Redis
+    ports:
+      - "6379:6379"
+    networks:
+      - back
+
+  # Data (backend) containers
+  prometheus:
+    image: prom/prometheus
+    container_name: Prometheus
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - back
+    depends_on:
+      - cadvisor
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - ../backend/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - back
+
+  traefik:
+      image: traefik:v2.4
+      command:
+        - "--api.insecure=true"
+        - "--providers.docker=true"
+        - "--providers.docker.exposedbydefault=false"
+        - "--entrypoints.web.address=:80"
+      ports:
+        - "80:80"
+        - "8084:8080"
+      networks:
+        - front
+        - back
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+  nginxLB01:
+      image: nginx:latest
+      networks:
+        - back
+      volumes:
+        - ./html/nginx01.html:/usr/share/nginx/html/index.html
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+        - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+  nginxLB02:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx02.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+  nginxLB03:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx03.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+
+  nginxLB04:
+    image: nginx:latest
+    networks:
+      - back
+    volumes:
+      - ./html/nginx04.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
