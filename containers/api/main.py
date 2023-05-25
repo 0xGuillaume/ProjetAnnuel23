@@ -1,101 +1,105 @@
-import json
+import uvicorn
+import psycopg2
 from fastapi import FastAPI
-
+from typing import List
+from pydantic import BaseModel
 
 app = FastAPI()
 
 
-def read_json(name:str) -> list:
-    """Read a json file and returns data
+class Database:
+    def __init__(self, dbname, user, password, host, port):
+        self.dbname = dbname
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
+        self.conn = None
 
-    Arguments:
-        name: Name of the json file to open
-    """    
-    
+    def connect(self):
+        self.conn = psycopg2.connect(
+            dbname=self.dbname,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            port=self.port
+        )
+
+    def disconnect(self):
+        if self.conn:
+            self.conn.close()
+
+    def execute_query(self, query):
+        if not self.conn:
+            self.connect()
+
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+
+        return results
+
+
+class Etudiant(BaseModel):
+    first_name: str
+    last_name: str
+    classe: str
+
+db = Database(
+    dbname="school",
+    user="postgres",
+    password="example",
+    host="postgres",
+    port="5432"
+)
+
+@app.get("/etudiants", response_model=List[Etudiant])
+def get_etudiants():
     try:
-        with open(f"data/{name}.json", "r") as file:
-            data = json.load(file)
-        return data
+        query = "select * from etudiant;"
+        results = db.execute_query(query)
 
-    except FileNotFoundError as error:
-        print("Fichier introuvable :", error)
+        etudiants = []
+        for row in results:
+            etudiant = Etudiant(
+                first_name=row[0],
+                last_name=row[1],
+                classe=row[2]
+            )
+            etudiants.append(etudiant)
+    except:
+        etudiants = "error"
 
+    return etudiants
 
-SERVERS         = read_json("servers")
-CONTAINERS      = read_json("containers")
-CLUSTERS        = read_json("servers")
-APPLICATIONS    = read_json("servers")
+@app.get("/etudiants/first_names", response_model=List[str])
+def get_etudiants_first_names():
+    query = "select first_name from etudiant;"
+    results = db.execute_query(query)
 
+    first_names = [row[0] for row in results]
 
-@app.get("/servers")
-def servers() -> list:
-    """List all servers"""
+    return first_names
 
-    return SERVERS
+@app.get("/etudiants/last_names", response_model=List[str])
+def get_etudiants_last_names():
+    query = "select last_name from etudiant;"
+    results = db.execute_query(query)
 
+    last_names = [row[0] for row in results]
 
-@app.get("/server/{hostname}")
-def read_server(hostname: str) -> list:
-    """Get details about one given server.
+    return last_names
 
-    Arguments:
-        hostname: Server's name.
-    """
+@app.get("/etudiants/classes", response_model=List[str])
+def get_etudiants_classes():
+    query = "select distinct classe from etudiant;"
+    results = db.execute_query(query)
 
-    return [server for server in SERVERS if server["hostname"] == hostname]
+    classes = [row[0] for row in results]
 
-
-@app.get("/clusters")
-def clusters() -> list:
-    """List all servers"""
-
-    return CLUSTERS
-
-
-@app.get("/cluster/{cluster_id}")
-def read_cluster(cluster:str) -> dict:
-    """Get details about one given cluster.
-
-    Arguments:
-        cluster: Cluster's id.
-    """
-
-    return [{"cluster_id": "cluster_01"}]
+    return classes
 
 
-@app.get("/applications")
-def applications() -> dict:
-    """List all applications"""
-
-    return CLUSTERS
-
-
-@app.get("/application/{name}")
-def read_application(name:str) -> dict:
-    """Get details about one given application.
-
-    Arguments:
-        name: Application's name.
-    """
-
-    response = {"name": "app de foo"}
-    return response
-
-
-@app.get("/containers")
-def containers() -> list:
-    """List all containers"""
-
-    return CONTAINERS
-
-
-@app.get("container/{name}")
-def read_container(name:str) -> dict:
-    """Get details about one given container.
-
-    Arguments:
-        name: Container's name.
-    """
-
-    response = {"name": "dck01", "image": "nginx"}
-    return response
+if __name__ == "__main__":
+   uvicorn.run(app, host="0.0.0.0", port=80) 
