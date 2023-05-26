@@ -1,0 +1,5 @@
+psycopg2==2.9.6
+psycopg2-binary==2.9.6
+pydantic==1.10.8
+uvicorn==0.22.0
+fastapi== 0.95.2
