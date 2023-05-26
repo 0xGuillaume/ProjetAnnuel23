@@ -44,7 +44,7 @@ services:
     image: python
     container_name: DCKCMPT03
     build: 
-      context: images
+      context: ./api
       dockerfile: Dockerfile
     volumes:
       - ./api:/app
