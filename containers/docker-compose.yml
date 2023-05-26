@@ -24,10 +24,10 @@ services:
       - front
       - back
     volumes:
-      - ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ../grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
-      - ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+      - ./grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+      - ./grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+      - ./grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
 
   adminer:
     image: adminer
@@ -43,9 +43,11 @@ services:
   api: # API 
     image: python
     container_name: DCKCMPT03
-    build: .
+    build: 
+      context: images
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./api:/app
     ports:
       - "8081:80"
     depends_on:
@@ -90,7 +92,7 @@ services:
     image: prom/prometheus
     container_name: Prometheus
     volumes:
-      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - back
     depends_on:
@@ -103,7 +105,7 @@ services:
     environment:
       POSTGRES_PASSWORD: example
     volumes:
-      - ../backend/sql/school.sql:/docker-entrypoint-initdb.d/school.sql
+      - ./sql/school.sql:/docker-entrypoint-initdb.d/school.sql
     ports:
       - "5432:5432"
     networks:
@@ -130,7 +132,7 @@ services:
       networks:
         - back
       volumes:
-        - ./html/nginx01.html:/usr/share/nginx/html/index.html
+        - ./statics/nginx01.html:/usr/share/nginx/html/index.html
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
@@ -141,7 +143,7 @@ services:
     networks:
       - back
     volumes:
-      - ./html/nginx02.html:/usr/share/nginx/html/index.html
+      - ./statics/nginx02.html:/usr/share/nginx/html/index.html
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
@@ -152,7 +154,7 @@ services:
     networks:
       - back
     volumes:
-      - ./html/nginx03.html:/usr/share/nginx/html/index.html
+      - ./statics/nginx03.html:/usr/share/nginx/html/index.html
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
@@ -163,7 +165,7 @@ services:
     networks:
       - back
     volumes:
-      - ./html/nginx04.html:/usr/share/nginx/html/index.html
+      - ./statics/nginx04.html:/usr/share/nginx/html/index.html
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nginx.rule=HostRegexp(`{host:.+}`)"
