@@ -1,8 +1,6 @@
 # Grafana 
 
-## Folder dashboards
-
-### Fichier config : dashboard.yml, docker-container.json, docker-host.json
+## Folder dashboards : dashboard.yml, docker-container.json, docker-host.json
 
 ### Fichier dashboard.yml
 
@@ -36,7 +34,7 @@ Mappage docker compose : ../grafana/provisioning/dashboards/docker-host.json:/et
 
 Fichier d'un dashboard qui affiche les données HOST dans Grafana 
 
-## Folder datasources
+## Folder datasources : datasource.yml 
 
 ### Fichier datasource.yml 
 
