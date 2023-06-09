@@ -6,7 +6,7 @@
 
 Mappage docker compose : ../grafana/provisioning/dashboards/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
 
-Fichier qui permet d'initialiser la source de donnée (Prometheus) pour la création des dashboard.
+Fichier qui permet d'initialiser la source de donnée (Prometheus) afin que les dashboards reconnaissent quelle source utiliser.
 
 ```
 apiVersion: 1
