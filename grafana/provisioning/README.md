@@ -24,6 +24,17 @@ providers:
     options:
       path: /etc/grafana/provisioning/dashboards
 ```
+### Fichier docker-container.json
+
+Mappage docker compose : ../grafana/provisioning/dashboards/docker-container.json:/etc/grafana/provisioning/dashboards/docker-container.json
+
+Fichier d'un dashboard qui affiche les données DOCKER dans Grafana 
+
+### Fichier docker-host.json
+
+Mappage docker compose : ../grafana/provisioning/dashboards/docker-host.json:/etc/grafana/provisioning/dashboards/docker-host.json
+
+Fichier d'un dashboard qui affiche les données HOST dans Grafana 
 
 ## Folder datasources
 
