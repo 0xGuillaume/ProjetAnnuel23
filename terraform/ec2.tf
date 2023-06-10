@@ -5,8 +5,15 @@ resource "aws_instance" "esgi_instance" {
   vpc_security_group_ids      = [aws_security_group.esgi_sg.id]
   associate_public_ip_address = true
 
-  user_data = <<EOF
+  #user_data = data.cloudinit_config.foobar.rendered
+  user_data = <<-EOL
   #!/bin/bash
-  touch /dev/test.txt
+  sudo -i -u ubuntu bash << EOF
+    sudo apt update -y
+    sudo apt install -y docker-compose
+
+    mkdir ~/test
+    touch ~/salut.txt
   EOF
+  EOL
 }
