@@ -10,7 +10,7 @@
 
 # Projet Annuel 2023
 
-> Projet en groupe de 4 dans le cadre de notre 1ère année de Master.
+> Projet en groupe de 5 dans le cadre de notre 1ère année de Mastère **Système, Réseau & Cloud**.
 
 
 ## Description
@@ -49,3 +49,19 @@ Pour ce faire, nous avons utilisé la stack suivante :
 3. `terraform` : Contient les fichiers terraform pour monter notre infrastructure sur AWS.
 
 
+## Gestion de Projet
+
+Nous avons organisé notre charge de travail à l'aide des [issues](https://github.com/0xGuillaume/ProjetAnnuel23/issues) GitHub. Ces issues sont aussi matérialisées dans le [backlog](https://github.com/users/0xGuillaume/projects/12) proposé par Github. 
+
+Nos tâches ont également été organisées avec des `labels` pour définir la catégorie de chacune des tâches à accomplir (`Docker`, `Réseau`, `Gestion Git`, `Terraform`...), puis nous les avons classées dans 4 colonnes distinctes : 
+
+* **Backlog** : Tâches communes à accomplir.
+
+* **Documentation** : Tâches relatives à la documentation du projet.
+
+* **Done** : Tâches accomplies.
+
+* **Démo** : Tâches relatives à la présentation orale de notre projet.
+
+
+> Mise à jour le : 12-06-2023
