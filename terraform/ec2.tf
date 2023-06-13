@@ -12,8 +12,9 @@ resource "aws_instance" "esgi_instance" {
     sudo apt update -y
     sudo apt install -y docker-compose
 
-    mkdir ~/test
-    touch ~/salut.txt
+    git clone https://github.com/0xGuillaume/ProjetAnnuel23.git
+    sudo nohup docker-compose -f ~/ProjetAnnuel23/containers/docker-compose.yml up
+
   EOF
   EOL
 }
