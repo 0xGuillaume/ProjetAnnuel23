@@ -1,22 +1,22 @@
-resource "aws_vpc" "esgi_vpc" {
+resource "aws_vpc" "vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "esgisub" {
-  vpc_id            = aws_vpc.esgi_vpc.id
+resource "aws_subnet" "subnet" {
+  vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.0.0/24"
   availability_zone = "eu-west-1a"
 }
 
-resource "aws_eip" "esgi_eip" {
+resource "aws_eip" "ip" {
   vpc                       = true
   instance                  = aws_instance.esgi_instance.id
   associate_with_private_ip = aws_instance.esgi_instance.private_ip
 }
 
-resource "aws_security_group" "esgi_sg" {
+resource "aws_security_group" "sgroup" {
   name   = "docker_security_group"
-  vpc_id = aws_vpc.esgi_vpc.id
+  vpc_id = aws_vpc.vpc.id
 
   ingress {
     from_port   = 8085
@@ -76,22 +76,22 @@ resource "aws_security_group" "esgi_sg" {
 
 }
 
-resource "aws_internet_gateway" "esgi_igw" {
-  vpc_id = aws_vpc.esgi_vpc.id
+resource "aws_internet_gateway" "gateway" {
+  vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_route_table" "esgi_rt" {
-  vpc_id = aws_vpc.esgi_vpc.id
+resource "aws_route_table" "table" {
+  vpc_id = aws_vpc.vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.esgi_igw.id
+    gateway_id = aws_internet_gateway.gateway.id
   }
 }
 
-resource "aws_route_table_association" "esgi_rta" {
-  subnet_id      = aws_subnet.esgisub.id
-  route_table_id = aws_route_table.esgi_rt.id
+resource "aws_route_table_association" "table" {
+  subnet_id      = aws_subnet.subnet.id
+  route_table_id = aws_route_table.table.id
 }
 
 
