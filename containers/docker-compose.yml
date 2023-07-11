@@ -101,8 +101,6 @@ services:
       POSTGRES_PASSWORD: example
     volumes:
       - ./sql/school.sql:/docker-entrypoint-initdb.d/school.sql
-    ports:
-      - "5432:5432"
     networks:
       - back
 
