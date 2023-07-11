@@ -66,8 +66,6 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: Cadvisor
-    ports:
-      - "8086:8080"
     networks:
       - back
     volumes:
