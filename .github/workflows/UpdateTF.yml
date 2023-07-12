@@ -1,4 +1,4 @@
-name: Déploiement sur aws apres update d'un fichier .tf
+name: Deploy on AWS when a .tf file is updated
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: 1.5.1
+        terraform_version: 1.0.0
 
     - name: AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -34,32 +34,32 @@ jobs:
       run: terraform validate terraform
 
     - name: Terraform Plan
-    id: plan
-    run: |
-      mkdir -p plans
-      terraform plan -out=plans/myplan.out terraform
-    continue-on-error: true
-
+      id: plan
+      run: |
+        mkdir -p myterraform/plans
+        terraform plan -out=myterraform/plans/myplan.out terraform
+      continue-on-error: true
+      
     - name: Create Issue for Validation
-    if: ${{ success() }}
-    uses: actions/github-script@v3
-    with:
-      github-token: ${{secrets.GITHUB_TOKEN}}
-      script: |
-        const fs = require('fs');
-        const output = fs.readFileSync('./terraform/plans/myplan.out', 'utf8');
-        const issue = {
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          title: 'Terraform Plan Needs Validation',
-          body: `Please validate the following Terraform execution plan:
+      if: ${{ success() }}
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{secrets.ACCESS_TOKEN}}
+        script: |
+          const fs = require('fs');
+          const output = fs.readFileSync('./terraform/plans/myplan.out', 'utf8');
+          const issue = {
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: 'Terraform Plan Needs Validation',
+            body: `Please validate the following Terraform execution plan:
 
-          \`\`\`
-          ${output}
-          \`\`\`
-          If everything looks correct, close this issue to apply the plan.`
-        };
-        github.issues.create(issue);
+            \`\`\`
+            ${output}
+            \`\`\`
+            If everything looks correct, close this issue to apply the plan.`
+          };
+          github.issues.create(issue);
 
   apply:
     needs: plan
@@ -72,14 +72,14 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: 1.0.0
+        terraform_version: 1.5.1
 
     - name: AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-1a
+        aws-region: eu-west-3
 
     - name: Terraform Init
       run: terraform init terraform
