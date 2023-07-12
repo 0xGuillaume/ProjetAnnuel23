@@ -80,9 +80,6 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-1
         
-    - name: Terraform Destroy
-      run: terraform -chdir=terraform -state=terraform/terraform.tfstate destroy -auto-approve
-        
     - name: Terraform Init
       run: terraform -chdir=terraform init
 
