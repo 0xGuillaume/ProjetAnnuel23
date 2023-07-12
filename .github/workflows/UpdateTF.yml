@@ -1,4 +1,4 @@
-name: Déploiement sur aws post update tf file
+name: Deploy on AWS when a .tf file is updated
 
 on:
   push:
@@ -18,24 +18,25 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: 1.0.0
+        terraform_version: 1.5.1
 
     - name: AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-1a
+        aws-region: eu-west-1
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform -chdir=terraform init
 
     - name: Terraform Validate
-      run: terraform validate
+      run: terraform -chdir=terraform validate
 
     - name: Terraform Plan
       id: plan
-      run: terraform plan -out=tfplan
+      run: |
+        terraform -chdir=terraform plan -out=myplan.out
       continue-on-error: true
       
     - name: Create Issue for Validation
@@ -45,7 +46,7 @@ jobs:
         github-token: ${{secrets.ACCESS_TOKEN}}
         script: |
           const fs = require('fs');
-          const output = fs.readFileSync('./tfplan', 'utf8');
+          const output = fs.readFileSync('./terraform/myplan.out', 'utf8');
           const issue = {
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -77,10 +78,10 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-1a
+        aws-region: eu-west-1
 
     - name: Terraform Init
-      run: terraform init
+      run: terraform -chdir=terraform init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve
+      run: terraform -chdir=terraform apply -auto-approve
