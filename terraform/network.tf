@@ -15,7 +15,7 @@ resource "aws_eip" "ip" {
 }
 
 resource "aws_security_group" "sgroup" {
-  name   = "docker_security_group"
+  name   = "fooooo_docker_security_group"
   vpc_id = aws_vpc.vpc.id
 
   ingress {
