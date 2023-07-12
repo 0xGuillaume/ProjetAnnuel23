@@ -1,0 +1,15 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+*.out
+
+
+# Python
+venv/
+env/
+__pycache__/
+
+# Common file
+*.swp
+

@@ -54,21 +54,18 @@ services:
       - postgres
     networks:
       - back
+      - front
 
   node-exporter:
     image: prom/node-exporter
     container_name: Node-exporter
     restart: always
-    ports:
-      - "9100:9100"
     networks:
       - back
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: Cadvisor
-    ports:
-      - "8086:8080"
     networks:
       - back
     volumes:
@@ -82,8 +79,6 @@ services:
   redis:
     image: redis:latest
     container_name: Redis
-    ports:
-      - "6379:6379"
     networks:
       - back
 
