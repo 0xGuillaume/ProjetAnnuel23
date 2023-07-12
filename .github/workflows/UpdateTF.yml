@@ -46,7 +46,7 @@ jobs:
         github-token: ${{secrets.ACCESS_TOKEN}}
         script: |
           const fs = require('fs');
-          const output = fs.readFileSync('./terraform/plans/myplan.out', 'utf8');
+          const output = fs.readFileSync('./terraform/myplan.out', 'utf8');
           const issue = {
             owner: context.repo.owner,
             repo: context.repo.repo,
