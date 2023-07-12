@@ -28,16 +28,16 @@ jobs:
         aws-region: eu-west-3
 
     - name: Terraform Init
-      run: terraform init terraform
+      run: terraform -chdir=terraform init
 
     - name: Terraform Validate
-      run: terraform validate terraform
+      run: terraform -chdir=terraform validate
 
     - name: Terraform Plan
       id: plan
       run: |
         mkdir -p myterraform/plans
-        terraform plan -out=myterraform/plans/myplan.out terraform
+        terraform -chdir=terraform plan -out=myterraform/plans/myplan.out
       continue-on-error: true
       
     - name: Create Issue for Validation
@@ -82,7 +82,7 @@ jobs:
         aws-region: eu-west-3
 
     - name: Terraform Init
-      run: terraform init terraform
+      run: terraform -chdir=terraform init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve terraform
+      run: terraform -chdir=terraform apply -auto-approve
