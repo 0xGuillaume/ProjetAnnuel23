@@ -42,7 +42,7 @@ jobs:
       if: ${{ success() }}
       uses: actions/github-script@v3
       with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
+        github-token: ${{secrets.ACCESS_TOKEN}}
         script: |
           const fs = require('fs');
           const output = fs.readFileSync('./tfplan', 'utf8');
